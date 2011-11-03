@@ -311,10 +311,12 @@ class CakeMigration extends Object {
 				if ($type === 'drop') {
 					$field = $col;
 				}
-				if ($type !== 'add' && !isset($tableFields[$field])) {
-					throw new MigrationException($this, sprintf(
-						__d('migrations', 'Field "%s" does not exists in "%s".'), $field, $table
-					));
+				if ($field != 'tableParameters') {
+					if ($type !== 'add' && !isset($tableFields[$field])) {
+						throw new MigrationException($this, sprintf(
+							__d('migrations', 'Field "%s" does not exists in "%s".'), $field, $table
+						));
+					}
 				}
 
 				switch ($type) {
@@ -334,9 +336,13 @@ class CakeMigration extends Object {
 						));
 						break;
 					case 'change':
-						$def = array_merge($tableFields[$field], $col);
-						if (!empty($def['length']) && !empty($col['type']) && substr($col['type'], 0, 4) == 'date') {
-							$def['length'] = null;
+						if ($field == 'tableParameters') {
+							$def = $col;
+						} else {
+							$def = array_merge($tableFields[$field], $col);
+							if (!empty($def['length']) && !empty($col['type']) && substr($col['type'], 0, 4) == 'date') {
+								$def['length'] = null;
+							}
 						}
 						$sql = $this->db->alterSchema(array(
 							$table => array('change' => array($field => $def))
