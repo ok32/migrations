@@ -327,10 +327,12 @@ class CakeMigration extends Object {
 				if ($type === 'drop') {
 					$field = $col;
 				}
-				if ($type !== 'add' && !isset($tableFields[$field])) {
-					throw new MigrationException($this, sprintf(
-						__d('migrations', 'Field "%s" does not exists in "%s".', true), $field, $table
-					));
+				if ($field != 'tableParameters') {
+					if ($type !== 'add' && !isset($tableFields[$field])) {
+						throw new MigrationException($this, sprintf(
+							__d('migrations', 'Field "%s" does not exists in "%s".', true), $field, $table
+						));
+					}
 				}
 
 				switch ($type) {
@@ -350,9 +352,15 @@ class CakeMigration extends Object {
 						));
 						break;
 					case 'change':
-						$sql = $this->db->alterSchema(array(
-							$table => array('change' => array($field => array_merge($tableFields[$field], $col)))
-						));
+						if ($field == 'tableParameters') {
+							$sql = $this->db->alterSchema(array(
+								$table => array('change' => array($field => $col))
+							));
+						} else {
+							$sql = $this->db->alterSchema(array(
+								$table => array('change' => array($field => array_merge($tableFields[$field], $col)))
+							));
+						}
 						break;
 					case 'rename':
 						$sql = $this->db->alterSchema(array(
